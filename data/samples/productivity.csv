@@ -1,0 +1,6 @@
+field_id,season,area_ha,yield_bag_ha,ndvi_avg,rainfall_mm,efficiency_index
+101,Safra 23/24,120,62.4,0.74,1180,0.88
+101,Safrinha 23,95,94.2,0.68,960,0.81
+102,Safra 23/24,210,59.8,0.71,1105,0.85
+103,Safra 23/24,180,61.0,0.72,1222,0.89
+104,Safra 22/23,150,58.7,0.69,1088,0.83

@@ -1,0 +1,81 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgis/postgis:15-3.4
+    environment:
+      POSTGRES_USER: siad
+      POSTGRES_PASSWORD: siad
+      POSTGRES_DB: siad
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U siad"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  minio:
+    image: minio/minio:latest
+    environment:
+      MINIO_ROOT_USER: siad
+      MINIO_ROOT_PASSWORD: siad-secret
+    command: server /data --console-address :9001
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  backend:
+    build:
+      context: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      APP_ENV: development
+      DATABASE_URL: postgresql+asyncpg://siad:siad@postgres:5432/siad
+      SYNC_DATABASE_URL: postgresql+psycopg://siad:siad@postgres:5432/siad
+      REDIS_URL: redis://redis:6379/0
+      S3_ENDPOINT: http://minio:9000
+      S3_BUCKET: siad-uploads
+      S3_ACCESS_KEY: siad
+      S3_SECRET_KEY: siad-secret
+      STORAGE_DIR: /app/storage/uploads
+      JWT_SECRET: siad-secret
+      JWT_REFRESH_SECRET: siad-refresh
+      OTLP_ENDPOINT: http://otel-collector:4317
+    ports:
+      - "8000:8000"
+    command: ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  otel-collector:
+    image: otel/opentelemetry-collector:0.103.1
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./ops/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317"
+
+volumes:
+  pg_data:
+  minio_data:

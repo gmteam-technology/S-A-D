@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:15-3.4
+        env:
+          POSTGRES_USER: siad
+          POSTGRES_PASSWORD: siad
+          POSTGRES_DB: siad
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U siad" --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+    env:
+      DATABASE_URL: postgresql+asyncpg://siad:siad@localhost:5432/siad
+      SYNC_DATABASE_URL: postgresql+psycopg://siad:siad@localhost:5432/siad
+      REDIS_URL: redis://localhost:6379/0
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Backend deps
+        working-directory: backend
+        run: |
+          pip install poetry
+          poetry config virtualenvs.create false
+          poetry install --with dev
+      - name: Backend lint & tests
+        working-directory: backend
+        run: |
+          poetry run pytest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - name: Frontend deps
+        working-directory: frontend
+        run: npm ci
+      - name: Frontend lint & unit tests
+        working-directory: frontend
+        run: |
+          npm run lint
+          npm test
+      - name: Cypress E2E
+        working-directory: frontend
+        run: npm run test:e2e
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: false
+      - name: Build frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: false

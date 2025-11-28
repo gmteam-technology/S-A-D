@@ -1,0 +1,47 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "field_id": 101,
+        "name": "Talhão Norte",
+        "soil_type": "Latossolo Vermelho",
+        "ndvi": 0.72
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-55.9502, -12.5501],
+            [-55.9402, -12.5501],
+            [-55.9402, -12.5401],
+            [-55.9502, -12.5401],
+            [-55.9502, -12.5501]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "field_id": 102,
+        "name": "Talhão Central",
+        "soil_type": "Argissolo",
+        "ndvi": 0.68
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-54.7001, -16.4801],
+            [-54.6901, -16.4801],
+            [-54.6901, -16.4701],
+            [-54.7001, -16.4701],
+            [-54.7001, -16.4801]
+          ]
+        ]
+      }
+    }
+  ]
+}

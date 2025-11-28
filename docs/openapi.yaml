@@ -1,0 +1,719 @@
+openapi: 3.0.3
+info:
+  title: SIAD Agro API
+  version: 0.1.0
+  description: |
+    API FastAPI para o Sistema de Informação de Apoio à Decisão agrícola. Esta definição
+    resume os principais endpoints implementados.
+servers:
+  - url: https://api.siad.ag
+    description: Produção
+  - url: http://localhost:8000
+    description: Desenvolvimento
+paths:
+  /health/z:
+    get:
+      summary: Healthcheck básico
+      responses:
+        '200':
+          description: API operacional
+  /auth/login:
+    post:
+      summary: Autenticação com e-mail e senha
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Token emitido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+  /auth/refresh:
+    post:
+      summary: Atualiza tokens JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Novos tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+  /weather/stations:
+    get:
+      summary: Lista estações monitoradas
+      responses:
+        '200':
+          description: Lista de estações
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StationResponse'
+  /weather/forecast:
+    get:
+      summary: Retorna previsão de 7 dias
+      parameters:
+        - name: station
+          in: query
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Série de previsão
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForecastResponse'
+  /weather/history:
+    get:
+      summary: Histórico de chuva e índices
+      parameters:
+        - name: station
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Histórico consolidado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryResponse'
+  /crops/season:
+    get:
+      summary: Lista safras cadastradas
+      responses:
+        '200':
+          description: Safras
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SeasonSchema'
+  /crops/productivity:
+    get:
+      summary: Produtividade por safra
+      parameters:
+        - name: season_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Produtividade
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductivitySchema'
+  /crops/simulation:
+    post:
+      summary: Executa simulação de cenário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulationRequest'
+      responses:
+        '200':
+          description: Resultado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationResult'
+  /crops/simulation/compare:
+    post:
+      summary: Compara múltiplos cenários
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulationCompareRequest'
+      responses:
+        '200':
+          description: Lista de resultados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SimulationResult'
+  /scenarios:
+    post:
+      summary: Cria cenário agrícola
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScenarioSchema'
+      responses:
+        '200':
+          description: Cenário criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScenarioSchema'
+  /scenarios/{scenario_id}/evaluate:
+    post:
+      summary: Avalia cenário
+      parameters:
+        - name: scenario_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Avaliação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScenarioEvaluationSchema'
+  /scenarios/compare:
+    post:
+      summary: Compara avaliações existentes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: integer
+      responses:
+        '200':
+          description: Avaliações
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScenarioEvaluationSchema'
+  /soil/samples:
+    post:
+      summary: Cadastra amostra de solo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SoilSampleSchema'
+      responses:
+        '200':
+          description: Registro salvo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoilSampleSchema'
+  /soil/analysis:
+    get:
+      summary: Analisa fertilidade
+      parameters:
+        - name: field_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Recomendação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoilAnalysisResponse'
+  /fields:
+    get:
+      summary: Lista talhões
+      responses:
+        '200':
+          description: Talhões
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FieldSchema'
+    post:
+      summary: Cria talhão
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FieldSchema'
+      responses:
+        '200':
+          description: Talhão criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldSchema'
+  /fields/{field_id}/layers:
+    post:
+      summary: Adiciona camada ao talhão
+      parameters:
+        - name: field_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FieldLayerSchema'
+      responses:
+        '200':
+          description: Camada criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldLayerSchema'
+  /inputs:
+    get:
+      summary: Lista insumos
+      responses:
+        '200':
+          description: Insumos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InputItemSchema'
+    post:
+      summary: Cadastra insumo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputItemSchema'
+      responses:
+        '200':
+          description: Insumo salvo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InputItemSchema'
+  /inputs/cost-analysis:
+    post:
+      summary: Executa análise de custos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CostAnalysisSchema'
+      responses:
+        '200':
+          description: Comparativo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CostComparisonResponse'
+  /reports:
+    get:
+      summary: Lista relatórios
+      responses:
+        '200':
+          description: Jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportStatus'
+    post:
+      summary: Solicita relatório
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportRequest'
+      responses:
+        '200':
+          description: Job criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportStatus'
+  /etl/upload:
+    post:
+      summary: Upload de arquivos (CSV/XLSX/JSON)
+      responses:
+        '200':
+          description: Job criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ETLJobResponse'
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    LoginResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/UserRead'
+        tokens:
+          $ref: '#/components/schemas/TokenPair'
+    RefreshRequest:
+      type: object
+      properties:
+        refresh_token:
+          type: string
+    TokenPair:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        token_type:
+          type: string
+          default: bearer
+    UserRead:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        full_name:
+          type: string
+        role:
+          type: string
+    StationResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        elevation:
+          type: number
+    ForecastResponse:
+      type: object
+      properties:
+        station_code:
+          type: string
+        generated_at:
+          type: string
+          format: date-time
+        forecast:
+          type: array
+          items:
+            $ref: '#/components/schemas/ForecastDay'
+    ForecastDay:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        min_temp_c:
+          type: number
+        max_temp_c:
+          type: number
+        rainfall_mm:
+          type: number
+        risk_index:
+          type: number
+    HistoryResponse:
+      type: object
+      properties:
+        station_code:
+          type: string
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeatherSummary'
+    WeatherSummary:
+      type: object
+      properties:
+        station:
+          type: string
+        rainfall_mm:
+          type: number
+        temperature_c:
+          type: number
+        eto:
+          type: number
+        ndvi:
+          type: number
+    SeasonSchema:
+      type: object
+      properties:
+        id:
+          type: integer
+        field_id:
+          type: integer
+        cultivar:
+          type: string
+        planting_date:
+          type: string
+          format: date
+        harvest_date:
+          type: string
+          format: date
+        expected_yield_bag_ha:
+          type: number
+        cost_per_ha:
+          type: number
+    ProductivitySchema:
+      type: object
+      properties:
+        season_id:
+          type: integer
+        area_ha:
+          type: number
+        yield_bag_ha:
+          type: number
+        ndvi_avg:
+          type: number
+        rainfall_total:
+          type: number
+        efficiency_index:
+          type: number
+    SimulationRequest:
+      type: object
+      properties:
+        field_id:
+          type: integer
+        rainfall_delta_pct:
+          type: number
+        input_cost_delta_pct:
+          type: number
+        fertilizer_delta_pct:
+          type: number
+        cultivar:
+          type: string
+        bag_price:
+          type: number
+    SimulationResult:
+      type: object
+      properties:
+        scenario_name:
+          type: string
+        projected_yield:
+          type: number
+        projected_margin:
+          type: number
+        risk_score:
+          type: number
+        breakdown:
+          type: object
+          additionalProperties: true
+    SimulationCompareRequest:
+      type: object
+      properties:
+        scenarios:
+          type: array
+          items:
+            $ref: '#/components/schemas/SimulationRequest'
+    ScenarioSchema:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        rainfall_delta_pct:
+          type: number
+        input_cost_delta_pct:
+          type: number
+        fertilizer_delta_pct:
+          type: number
+        cultivar:
+          type: string
+        bag_price:
+          type: number
+    ScenarioEvaluationSchema:
+      type: object
+      properties:
+        scenario_id:
+          type: integer
+        projected_yield:
+          type: number
+        projected_margin:
+          type: number
+        risk_score:
+          type: number
+        payload:
+          type: object
+          additionalProperties: true
+    SoilSampleSchema:
+      type: object
+      properties:
+        field_id:
+          type: integer
+        depth_cm:
+          type: integer
+        ph:
+          type: number
+        organic_matter:
+          type: number
+        nitrogen:
+          type: number
+        phosphorus:
+          type: number
+        potassium:
+          type: number
+        recommendation:
+          type: string
+    SoilAnalysisResponse:
+      type: object
+      properties:
+        field_id:
+          type: integer
+        lime_recommendation_kg_ha:
+          type: number
+        fertilizer_plan:
+          type: object
+          additionalProperties: true
+        warnings:
+          type: array
+          items:
+            type: string
+    FieldSchema:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        area_ha:
+          type: number
+        soil_type:
+          type: string
+        drainage_class:
+          type: string
+        geometry:
+          type: object
+        layers:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldLayerSchema'
+    FieldLayerSchema:
+      type: object
+      properties:
+        id:
+          type: integer
+        layer_type:
+          type: string
+        stats:
+          type: object
+          additionalProperties: true
+        raster_url:
+          type: string
+    InputItemSchema:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        unit:
+          type: string
+        unit_cost:
+          type: number
+        supplier:
+          type: string
+    CostAnalysisSchema:
+      type: object
+      properties:
+        field_id:
+          type: integer
+        season_id:
+          type: integer
+        cost_per_ha:
+          type: number
+        margin_expected:
+          type: number
+        delta_price_pct:
+          type: number
+        payload:
+          type: object
+          additionalProperties: true
+    CostComparisonResponse:
+      type: object
+      properties:
+        baseline_cost:
+          type: number
+        scenario_cost:
+          type: number
+        sensitivity:
+          type: object
+          additionalProperties: true
+    ReportRequest:
+      type: object
+      properties:
+        report_type:
+          type: string
+          enum: [safra, clima, custos, previsao, mapas]
+        params:
+          type: object
+          additionalProperties: true
+    ReportStatus:
+      type: object
+      properties:
+        id:
+          type: integer
+        report_type:
+          type: string
+        status:
+          type: string
+        file_url:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        finished_at:
+          type: string
+          format: date-time
+    ETLJobResponse:
+      type: object
+      properties:
+        job_id:
+          type: string
+        status:
+          type: string
+        issues:
+          type: array
+          items:
+            type: string

@@ -5,6 +5,7 @@ import { MapContainer, Polygon, TileLayer, GeoJSON } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-draw/dist/leaflet.draw.css'
 import L from 'leaflet'
+import type { FeatureCollection, Polygon as GeoPolygon } from 'geojson'
 import { useUiStore } from '@/store/useUiStore'
 
 const talhoes = [
@@ -39,13 +40,16 @@ export function AgroMap() {
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
-  const geojson = useMemo(
+  const geojson = useMemo<FeatureCollection<GeoPolygon>>(
     () => ({
       type: 'FeatureCollection',
       features: talhoes.map((coords, index) => ({
         type: 'Feature',
         properties: { name: `Talhão ${index + 1}` },
-        geometry: { type: 'Polygon', coordinates: [coords.map((pair) => [pair[1], pair[0]])] },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [coords.map((pair) => [pair[1], pair[0]])],
+        },
       })),
     }),
     [],

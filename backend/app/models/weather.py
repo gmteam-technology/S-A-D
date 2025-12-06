@@ -49,7 +49,7 @@ class RadarSnapshot(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     timestamp: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=datetime.utcnow)
     geojson_url: Mapped[str] = mapped_column(String(512))
-    metadata: Mapped[dict | None]
+    metadata_json: Mapped[dict | None] = mapped_column("metadata")
 
 
 class ClimaticIndicator(Base):

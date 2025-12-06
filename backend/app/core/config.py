@@ -36,9 +36,6 @@ class Settings(BaseSettings):
 
     default_locale: str = "pt-BR"
 
-    class Config:
-        env_file = ".env"
-
     @field_validator("backend_cors_origins")
     @classmethod
     def split_str(cls, v: List[AnyHttpUrl] | str) -> List[AnyHttpUrl] | str:

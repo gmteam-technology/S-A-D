@@ -237,7 +237,7 @@ async def seed_scenarios(session: AsyncSession, owner_id: int) -> None:
 
 
 async def seed_all(dataset: str) -> None:
-    engine = create_async_engine(settings.database_url, echo=False)
+    engine = create_async_engine(str(settings.database_url), echo=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     async with AsyncSession(engine) as session:

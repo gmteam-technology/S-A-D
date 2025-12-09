@@ -9,9 +9,7 @@ const withPwa = withPWA({
 })
 
 const nextConfig: NextConfig = {
-  experimental: {
-    typedRoutes: true,
-  },
+  typedRoutes: true,
   images: {
     remotePatterns: [
       {
@@ -20,6 +18,17 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  webpack: (config: any, { dev }: { dev: boolean }) => {
+    // Configurações para reduzir uso de memória durante o build no Docker
+    if (!dev) {
+      // Limita o paralelismo para evitar erros de workers no Docker
+      config.parallelism = Math.min(config.parallelism || 1, 2)
+    }
+    return config
+  },
+  // Configuração turbopack vazia para silenciar o aviso
+  // (usamos webpack explicitamente via flag --webpack)
+  turbopack: {},
 }
 
 export default withPwa(nextConfig)

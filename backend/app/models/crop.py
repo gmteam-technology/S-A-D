@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from sqlalchemy import Float, ForeignKey, Integer, Numeric, String, TIMESTAMP
+from sqlalchemy import Float, ForeignKey, Integer, JSON, Numeric, String, TIMESTAMP
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
@@ -42,7 +42,7 @@ class CropSimulation(Base):
     cultivar: Mapped[str]
     density_plants_ha: Mapped[int]
     expected_margin_per_ha: Mapped[float]
-    payload: Mapped[dict | None]
+    payload: Mapped[dict | None] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=datetime.utcnow)
 
     season: Mapped[Season] = relationship(lazy="joined")

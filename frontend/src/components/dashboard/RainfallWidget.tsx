@@ -18,8 +18,8 @@ export function RainfallWidget() {
         </div>
         <span className="text-xs font-medium text-slate-500">Últimos 7 dias</span>
       </div>
-      <div className="h-56 pt-4">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="h-56 min-h-[224px] pt-4">
+        <ResponsiveContainer width="100%" height="100%" minHeight={200}>
           <AreaChart data={series} margin={{ top: 10, left: 0, right: 0 }}>
             <defs>
               <linearGradient id="rain" x1="0" x2="0" y1="0" y2="1">

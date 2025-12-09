@@ -24,6 +24,9 @@ Serviços expostos:
 
 ## Execução manual
 ### Backend
+
+**⚠️ Requisito de Python:** O projeto requer Python 3.11 ou 3.12. Python 3.13 não é suportado devido à falta de wheels pré-compilados para alguns pacotes (pyarrow, asyncpg) no Windows.
+
 ```bash
 cd backend
 poetry install
@@ -31,6 +34,10 @@ poetry run alembic upgrade head
 poetry run seed run
 poetry run uvicorn app.main:app --reload
 ```
+
+**Nota sobre Python 3.13:** Se você estiver usando Python 3.13 e encontrar erros de compilação, você tem duas opções:
+1. **Recomendado:** Use Python 3.11 ou 3.12 (conforme especificado no `pyproject.toml`)
+2. **Alternativa:** Instale o Microsoft Visual C++ Build Tools: https://visualstudio.microsoft.com/visual-cpp-build-tools/
 
 ### Frontend
 ```bash

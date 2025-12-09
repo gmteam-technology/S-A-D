@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Float, ForeignKey, Integer, Numeric, String, TIMESTAMP
+from sqlalchemy import Float, ForeignKey, Integer, JSON, Numeric, String, TIMESTAMP
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.session import Base
@@ -29,5 +29,5 @@ class ScenarioEvaluation(Base):
     projected_yield: Mapped[float]
     projected_margin: Mapped[float]
     risk_score: Mapped[float]
-    payload: Mapped[dict | None]
+    payload: Mapped[dict | None] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=datetime.utcnow)

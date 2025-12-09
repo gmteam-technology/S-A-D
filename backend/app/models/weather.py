@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from sqlalchemy import Float, ForeignKey, Integer, Numeric, String, TIMESTAMP
+from sqlalchemy import Float, ForeignKey, Integer, JSON, Numeric, String, TIMESTAMP
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.session import Base
@@ -49,7 +49,7 @@ class RadarSnapshot(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     timestamp: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=datetime.utcnow)
     geojson_url: Mapped[str] = mapped_column(String(512))
-    metadata: Mapped[dict | None]
+    radar_metadata: Mapped[dict | None] = mapped_column("metadata", JSON)
 
 
 class ClimaticIndicator(Base):

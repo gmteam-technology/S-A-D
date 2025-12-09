@@ -26,7 +26,7 @@ class Field(Base):
     soil_type: Mapped[str | None] = mapped_column(String(64))
     drainage_class: Mapped[str | None] = mapped_column(String(64))
     owner_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
-    metadata: Mapped[dict | None] = mapped_column(JSON, default=dict)
+    field_metadata: Mapped[dict | None] = mapped_column("metadata", JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=datetime.utcnow)
 
     layers: Mapped[list["FieldLayer"]] = relationship(back_populates="field", cascade="all, delete-orphan")
@@ -54,5 +54,5 @@ class FieldSensor(Base):
     sensor_type: Mapped[str] = mapped_column(String(64))
     unit: Mapped[str] = mapped_column(String(32))
     last_value: Mapped[float | None] = mapped_column(Numeric(10, 2))
-    metadata: Mapped[dict | None] = mapped_column(JSON)
+    sensor_metadata: Mapped[dict | None] = mapped_column("metadata", JSON)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=datetime.utcnow)

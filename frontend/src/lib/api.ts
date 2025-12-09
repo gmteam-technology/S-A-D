@@ -54,4 +54,96 @@ export const api = {
   },
   seasons: () => request<CropSeason[]>({ path: '/crops/season', fallback: seasonsMock }),
   scenarios: () => Promise.resolve(scenariosMock as ScenarioConfig[]),
+  getKPIs: async () => {
+    const data = await request<{
+      area_ha: number
+      avg_productivity_kg_ha: number
+      total_yield_t: number
+      avg_moisture_pct: number
+      avg_protein_pct: number
+      estimated_margin_r_ha: number
+      last_updated: string
+    }>({
+      path: '/dashboard/kpis',
+      fallback: {
+        area_ha: 1250.5,
+        avg_productivity_kg_ha: 3450.2,
+        total_yield_t: 4312.8,
+        avg_moisture_pct: 13.2,
+        avg_protein_pct: 38.5,
+        estimated_margin_r_ha: 2100.0,
+        last_updated: new Date().toISOString()
+      }
+    })
+    return data
+  },
+  getCurrentPrices: async () => {
+    const data = await request<{
+      soybean: {
+        spot: {
+          price_r_sc: number
+          price_r_t: number
+          source: string
+          timestamp: string
+          last_updated: string
+          cache_ttl_seconds: number
+        }
+        contract: {
+          price_r_sc: number
+          maturity: string
+          source: string
+          timestamp: string
+        }
+      }
+      fertilizer: {
+        npk_10_10_10: {
+          price_r_t: number
+          source: string
+          timestamp: string
+        }
+      }
+      freight: {
+        price_r_t: number
+        route: string
+        distance_km: number
+        source: string
+        timestamp: string
+      }
+    }>({
+      path: '/prices/current',
+      fallback: {
+        soybean: {
+          spot: {
+            price_r_sc: 185.50,
+            price_r_t: 3108.33,
+            source: 'CEPEA/ESALQ',
+            timestamp: new Date().toISOString(),
+            last_updated: new Date().toISOString(),
+            cache_ttl_seconds: 300
+          },
+          contract: {
+            price_r_sc: 188.20,
+            maturity: '2025-03',
+            source: 'B3',
+            timestamp: new Date().toISOString()
+          }
+        },
+        fertilizer: {
+          npk_10_10_10: {
+            price_r_t: 3450.00,
+            source: 'ANDA',
+            timestamp: new Date().toISOString()
+          }
+        },
+        freight: {
+          price_r_t: 85.00,
+          route: 'Fazenda → Port',
+          distance_km: 120,
+          source: 'AgroFreight API',
+          timestamp: new Date().toISOString()
+        }
+      }
+    })
+    return data
+  },
 }
